@@ -14,10 +14,16 @@
 <body>
   <h1>BibleSwipe.com</h1>
   <br><br><br>
-  <div id="streak-display" style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px;">
-    <span id="streak-text" style="font-size: 2rem; font-weight: bold;">0</span>
-    <img src="assets/streak.svg" alt="Streak Icon" style="width: 32px; height: 32px;">
-  </div>  
+  <div id="streak-display" style="position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+    <div style="display: flex; align-items: center; gap: 5px;">
+      <span id="streak-text" style="font-size: 2rem; font-weight: bold;">0</span>
+      <img src="assets/streak.svg" alt="Streak Icon" style="width: 32px; height: 32px;">
+    </div>
+    <a href="settings.html" style="display: block;">
+      <img src="assets/gear.svg" alt="Settings Icon" style="width: 32px; height: 32px; cursor: pointer; margin-right: 0;">
+    </a>
+  </div>
+  
   <form id="verse-form">
     <div class="input-group">
       <div class="autocomplete">

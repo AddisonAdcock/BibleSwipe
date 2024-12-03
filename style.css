@@ -1,141 +1,186 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f5f5f5;
-    color: #333;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Light Theme */
+body.light {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Dark Theme */
+body.dark {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+/* Invert SVG colors for Dark Theme */
+body.dark img {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Headings */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.autocomplete {
+  position: relative;
+}
+
+input {
+  font-size: 1.2rem;
+  padding: 10px;
+  width: 150px;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.suggestions {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  right: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 1000;
+  display: none;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Button Styles */
+button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  color: white;
+  background-color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Hover effects for buttons */
+button:hover {
+  background-color: #333;
+}
+
+/* Button color for Dark Mode */
+body.dark button {
+  color: black;
+  background-color: white;
+}
+
+body.dark button:hover {
+  background-color: #ccc;
+}
+
+/* Verse Display */
+#verse-display {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+#verse-text {
+  font-size: 2rem;
+  line-height: 1.8;
+  text-align: center;
+  word-wrap: break-word;
+  max-width: 90%;
+  overflow-wrap: break-word;
+  transition: font-size 0.2s ease;
+}
+
+#verse-reference {
+  margin-top: 10px;
+  font-size: 1.5rem;
+  color: #666;
+  transition: font-size 0.2s ease;
+}
+
+/* Adjustments for SVG Display */
+#streak-display {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#streak-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* Adjustments for Small Screens */
+@media (max-width: 480px) {
   h1 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .input-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  
-  .autocomplete {
-    position: relative;
-  }
-  
-  input {
-    font-size: 1.2rem;
-    padding: 10px;
-    width: 150px;
-    max-width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-  }
-  
-  .suggestions {
-    position: absolute;
-    top: 45px;
-    left: 0;
-    right: 0;
-    max-height: 150px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    z-index: 1000;
-    display: none;
-  }
-  
-  .suggestion-item {
-    padding: 10px;
-    cursor: pointer;
-  }
-  
-  .suggestion-item:hover {
-    background-color: #f5f5f5;
-  }
-  
-  button {
-    font-size: 1.2rem;
-    padding: 10px 20px;
-    color: white;
-    background-color: #007BFF;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  #verse-display {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    padding: 0 20px;
-    box-sizing: border-box;
-  }
-  
-  #verse-text {
-    font-size: 2rem;
-    line-height: 1.8;
-    text-align: center;
-    word-wrap: break-word;
-    max-width: 90%;
-    overflow-wrap: break-word;
-    transition: font-size 0.2s ease;
-  }
-  
-  #verse-reference {
-    margin-top: 10px;
-    font-size: 1.5rem;
-    color: #666;
-    transition: font-size 0.2s ease;
-  }
-  
-  @media (max-width: 480px) {
-    h1 {
       font-size: 2rem;
-    }
-  
-    input {
+  }
+
+  input {
       font-size: 1rem;
       padding: 8px;
       width: 120px;
-    }
-  
-    button {
+  }
+
+  button {
       font-size: 1rem;
       padding: 8px 16px;
-    }
-  
-    #verse-text {
-      font-size: 1.5rem;
-    }
-  
-    #verse-reference {
-      font-size: 1.2rem;
-    }
   }
-  
+
+  #verse-text {
+      font-size: 1.5rem;
+  }
+
+  #verse-reference {
+      font-size: 1.2rem;
+  }
+}
