@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Reader - KJV</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -70,92 +69,137 @@
   </div>
 
   <script>
-    let bibleData = [];
+    const books = [
+  "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges",
+  "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
+  "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon",
+  "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+  "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+  "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians",
+  "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+  "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
+  "1 John", "2 John", "3 John", "Jude", "Revelation"
+  ];
+
+
     let currentBook = "Genesis";
     let currentChapter = 1;
     let currentVerse = 1;
-    let canScroll = true; // Controls scroll throttling
 
-    // Load the CSV using PapaParse
-    function loadBibleData() {
-      Papa.parse('kjv.csv', {
-        download: true,
-        header: true,
-        complete: function(results) {
-          bibleData = results.data;
-          console.log("Bible data loaded:", bibleData);
-          loadVerse();
-        }
-      });
+    // Fetch the verse from the folder structure
+    async function fetchVerse(book, chapter, verse) {
+      try {
+        const response = await fetch(`bible/${book}/${chapter}/${verse}.json`);
+        if (!response.ok) throw new Error("Verse not found");
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        return null; // Return null if the verse does not exist
+      }
     }
 
-    // Find the current verse text
-    function findVerse(book, chapter, verse) {
-      const result = bibleData.find(
-        (row) =>
-          row.book === book &&
-          parseInt(row.chapter) === chapter &&
-          parseInt(row.verse) === verse
-      );
-      return result ? result : null;
-    }
-
-    // Dynamically adjust font size for long verses
+    // Dynamically adjust font size to prevent scroll bars
     function adjustFontSize() {
       const verseTextElement = document.getElementById("verse-text");
       const verseReferenceElement = document.getElementById("verse-reference");
-      const containerHeight = window.innerHeight * 0.8;
 
-      let fontSize = 2; // Start with a base font size in rem
+      const containerHeight = window.innerHeight * 0.8; // Max height for content
+      const containerWidth = window.innerWidth * 0.9; // Max width for content
+
+      let fontSize = 2; // Start with base font size in rem
       verseTextElement.style.fontSize = `${fontSize}rem`;
       verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
 
-      while (verseTextElement.scrollHeight > containerHeight) {
+      while (
+        verseTextElement.scrollHeight > containerHeight ||
+        verseTextElement.scrollWidth > containerWidth
+      ) {
         fontSize -= 0.1; // Decrease font size incrementally
         verseTextElement.style.fontSize = `${fontSize}rem`;
         verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
+
+        if (fontSize <= 1) break; // Ensure font size doesn't get too small
       }
     }
 
-    // Load the current verse and reference
-    function loadVerse() {
-      const verseData = findVerse(currentBook, currentChapter, currentVerse);
-      const verseTextElement = document.getElementById("verse-text");
-      const verseReferenceElement = document.getElementById("verse-reference");
+    // Load the current verse
+    async function loadVerse() {
+      const data = await fetchVerse(currentBook, currentChapter, currentVerse);
 
-      if (verseData) {
-        verseTextElement.innerText = verseData.text;
-        verseReferenceElement.innerText = `${verseData.book} ${verseData.chapter}:${verseData.verse}`;
+      if (data) {
+        document.getElementById("verse-text").innerText = data.text;
+        document.getElementById("verse-reference").innerText = `${data.book} ${data.chapter}:${data.verse}`;
         adjustFontSize();
       } else {
-        verseTextElement.innerText = "No more verses.";
-        verseReferenceElement.innerText = "";
+        nextBook(); // Transition to the next book if no verse is found
       }
     }
 
-    // Throttle scrolling
-    function throttleScroll(callback, delay) {
-      if (canScroll) {
-        callback();
-        canScroll = false;
-        setTimeout(() => {
-          canScroll = true;
-        }, delay);
+    // Transition to the next book if at the end of the current book
+    function nextBook() {
+      const currentBookIndex = books.indexOf(currentBook);
+      if (currentBookIndex < books.length - 1) {
+        currentBook = books[currentBookIndex + 1];
+        currentChapter = 1;
+        currentVerse = 1;
+        loadVerse();
+      } else {
+        document.getElementById("verse-text").innerText = "You have reached the end of the Bible.";
+        document.getElementById("verse-reference").innerText = "";
       }
     }
+
+    // Navigate to the next verse
+    async function nextVerse() {
+      currentVerse++;
+      const nextVerseData = await fetchVerse(currentBook, currentChapter, currentVerse);
+      if (!nextVerseData) {
+        currentChapter++;
+        currentVerse = 1;
+
+        const nextChapterData = await fetchVerse(currentBook, currentChapter, currentVerse);
+        if (!nextChapterData) {
+          nextBook(); // If no more chapters, transition to the next book
+        } else {
+          loadVerse();
+        }
+      } else {
+        loadVerse();
+      }
+    }
+
+    // Navigate to the previous verse
+    async function prevVerse() {
+      if (currentVerse > 1) {
+        currentVerse--;
+      } else if (currentChapter > 1) {
+        currentChapter--;
+        currentVerse = 50; // Assume chapters have max 50 verses (adjust as needed)
+      } else {
+        const currentBookIndex = books.indexOf(currentBook);
+        if (currentBookIndex > 0) {
+          currentBook = books[currentBookIndex - 1];
+          currentChapter = 50; // Assume previous book has 50 chapters (adjust as needed)
+          currentVerse = 50; // Assume the last chapter has 50 verses
+        }
+      }
+      loadVerse();
+    }
+
+    // Initialize
+    loadVerse();
 
     // Handle desktop scrolling
     window.addEventListener("wheel", (e) => {
       if (e.deltaY > 0) {
-        throttleScroll(nextVerse, 750); // Set throttle delay to 750ms
+        nextVerse(); // Scroll down for next verse
       } else {
-        throttleScroll(prevVerse, 750);
+        prevVerse(); // Scroll up for previous verse
       }
     });
 
     // Handle touch gestures for mobile
     let startY = 0;
-
     document.addEventListener("touchstart", (e) => {
       startY = e.touches[0].clientY;
     });
@@ -163,36 +207,11 @@
     document.addEventListener("touchend", (e) => {
       const endY = e.changedTouches[0].clientY;
       if (startY > endY + 50) {
-        throttleScroll(nextVerse, 750); // Set throttle delay to 750ms
+        nextVerse(); // Swipe up for next verse
       } else if (startY < endY - 50) {
-        throttleScroll(prevVerse, 750);
+        prevVerse(); // Swipe down for previous verse
       }
     });
-
-    // Navigate to the next verse
-    function nextVerse() {
-      currentVerse++;
-      const nextVerseData = findVerse(currentBook, currentChapter, currentVerse);
-      if (!nextVerseData) {
-        currentChapter++;
-        currentVerse = 1;
-      }
-      loadVerse();
-    }
-
-    // Navigate to the previous verse
-    function prevVerse() {
-      if (currentVerse > 1) {
-        currentVerse--;
-      } else if (currentChapter > 1) {
-        currentChapter--;
-        currentVerse = 50; // Assume chapters have max 50 verses (adjust as needed)
-      }
-      loadVerse();
-    }
-
-    // Initialize
-    loadBibleData();
   </script>
 </body>
 </html>
