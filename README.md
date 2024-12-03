@@ -2,7 +2,7 @@
 
 ### **Read the Bible, One Verse at a Time**
 
-Bible Swipe is an interactive web application designed to help users read the Bible verse by verse in a seamless and user-friendly way. Users can start at any verse, swipe or scroll to navigate, and pick up where they left off with progress saved locally. The website is designed more for mobile users and could be used as a healthy alternitive to scrolling on social media. By breaking the Bible into individual verses there is less pressure on someone to have a lot of time to dedicate toward reading throughout the day. While I would reccommend dedicated study time, this website can help fill in gaps throughout your day with scripture instead of worldly content. I hope you enjoy!
+Bible Swipe is an interactive web application designed to help users read the Bible verse by verse in a seamless and user-friendly way. Users can start at any verse, swipe or scroll to navigate, and pick up where they left off with progress saved locally. The website is designed more for mobile users and could be used as a healthy alternitive to scrolling on social media. By breaking the Bible into individual verses there is less pressure on someone to have a lot of time to dedicate toward reading throughout the day. While I would reccommend dedicated study time, this website can help fill in gaps throughout your day with scripture instead of worldly content. This proeject uses the King James Version which is covered under creative commons. I hope you enjoy!
 ---
 
 ## **Features**
