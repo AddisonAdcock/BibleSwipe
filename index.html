@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bible Reader - KJV</title>
+  <title>Welcome to Bible Reader</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,202 +14,181 @@
       padding: 0;
       height: 100vh;
       width: 100vw;
-      overflow: hidden; /* Prevent scroll bars */
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
     }
 
-    #verse-display {
-      text-align: center;
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+
+    form {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      height: 100%;
-      width: 100%;
-      padding: 0 20px;
-      box-sizing: border-box; /* Include padding in width/height calculations */
+      gap: 20px;
     }
 
-    #verse-text {
-      font-size: 2rem;
-      line-height: 1.8;
-      text-align: center;
-      word-wrap: break-word;
-      max-width: 90%;
-      overflow-wrap: break-word;
-      transition: font-size 0.2s ease;
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
     }
 
-    #verse-reference {
-      margin-top: 10px;
-      font-size: 1.5rem;
-      color: #666;
-      transition: font-size 0.2s ease;
+    .autocomplete {
+      position: relative;
     }
 
-    /* Ensure proper scaling for smaller devices */
-    @media (max-width: 360px) {
-      #verse-text {
-        font-size: 1.5rem;
+    input {
+      font-size: 1.2rem;
+      padding: 10px;
+      width: 150px;
+      max-width: 100%; /* Ensure inputs don't overflow on small screens */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 45px;
+      left: 0;
+      right: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      z-index: 1000;
+      display: none; /* Hide suggestions by default */
+    }
+
+    .suggestion-item {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    button {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+      color: white;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Responsive styles for smaller screens */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
       }
 
-      #verse-reference {
-        font-size: 1.2rem;
+      p {
+        font-size: 1rem;
+      }
+
+      input {
+        font-size: 1rem;
+        padding: 8px;
+        width: 120px;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 8px 16px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="verse-display">
-    <div id="verse-text">Loading...</div>
-    <div id="verse-reference"></div>
-  </div>
+  <h1>Welcome to Bible Reader</h1>
+  <p></p>
+  <form id="verse-form">
+    <div class="input-group">
+      <div class="autocomplete">
+        <input id="book-input" type="text" placeholder="Book" autocomplete="off" />
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+      <input id="chapter-input" type="number" placeholder="Chapter" min="1" />
+      <input id="verse-input" type="number" placeholder="Verse" min="1" />
+    </div>
+    <button type="submit">Go to Verse</button>
+  </form>
 
   <script>
     const books = [
-  "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges",
-  "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
-  "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon",
-  "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
-  "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
-  "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians",
-  "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
-  "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
-  "1 John", "2 John", "3 John", "Jude", "Revelation"
-  ];
+      "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges",
+      "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
+      "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon",
+      "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+      "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+      "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians",
+      "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+      "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
+      "1 John", "2 John", "3 John", "Jude", "Revelation"
+    ];
 
+    const bookInput = document.getElementById("book-input");
+    const suggestions = document.getElementById("suggestions");
+    const form = document.getElementById("verse-form");
 
-    let currentBook = "Genesis";
-    let currentChapter = 1;
-    let currentVerse = 1;
-
-    // Fetch the verse from the folder structure
-    async function fetchVerse(book, chapter, verse) {
-      try {
-        const response = await fetch(`bible/${book}/${chapter}/${verse}.json`);
-        if (!response.ok) throw new Error("Verse not found");
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        return null; // Return null if the verse does not exist
-      }
-    }
-
-    // Dynamically adjust font size to prevent scroll bars
-    function adjustFontSize() {
-      const verseTextElement = document.getElementById("verse-text");
-      const verseReferenceElement = document.getElementById("verse-reference");
-
-      const containerHeight = window.innerHeight * 0.8; // Max height for content
-      const containerWidth = window.innerWidth * 0.9; // Max width for content
-
-      let fontSize = 2; // Start with base font size in rem
-      verseTextElement.style.fontSize = `${fontSize}rem`;
-      verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
-
-      while (
-        verseTextElement.scrollHeight > containerHeight ||
-        verseTextElement.scrollWidth > containerWidth
-      ) {
-        fontSize -= 0.1; // Decrease font size incrementally
-        verseTextElement.style.fontSize = `${fontSize}rem`;
-        verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
-
-        if (fontSize <= 1) break; // Ensure font size doesn't get too small
-      }
-    }
-
-    // Load the current verse
-    async function loadVerse() {
-      const data = await fetchVerse(currentBook, currentChapter, currentVerse);
-
-      if (data) {
-        document.getElementById("verse-text").innerText = data.text;
-        document.getElementById("verse-reference").innerText = `${data.book} ${data.chapter}:${data.verse}`;
-        adjustFontSize();
+    bookInput.addEventListener("input", () => {
+      const input = bookInput.value.toLowerCase();
+      suggestions.innerHTML = ""; 
+      if (input) {
+        books
+          .filter((book) => book.toLowerCase().startsWith(input))
+          .forEach((book) => {
+            const suggestionItem = document.createElement("div");
+            suggestionItem.classList.add("suggestion-item");
+            suggestionItem.textContent = book;
+            suggestionItem.addEventListener("click", () => {
+              bookInput.value = book;
+              suggestions.innerHTML = "";
+              suggestions.style.display = "none";
+            });
+            suggestions.appendChild(suggestionItem);
+          });
+        suggestions.style.display = "block";
       } else {
-        nextBook(); // Transition to the next book if no verse is found
-      }
-    }
-
-    // Transition to the next book if at the end of the current book
-    function nextBook() {
-      const currentBookIndex = books.indexOf(currentBook);
-      if (currentBookIndex < books.length - 1) {
-        currentBook = books[currentBookIndex + 1];
-        currentChapter = 1;
-        currentVerse = 1;
-        loadVerse();
-      } else {
-        document.getElementById("verse-text").innerText = "You have reached the end of the Bible.";
-        document.getElementById("verse-reference").innerText = "";
-      }
-    }
-
-    // Navigate to the next verse
-    async function nextVerse() {
-      currentVerse++;
-      const nextVerseData = await fetchVerse(currentBook, currentChapter, currentVerse);
-      if (!nextVerseData) {
-        currentChapter++;
-        currentVerse = 1;
-
-        const nextChapterData = await fetchVerse(currentBook, currentChapter, currentVerse);
-        if (!nextChapterData) {
-          nextBook(); // If no more chapters, transition to the next book
-        } else {
-          loadVerse();
-        }
-      } else {
-        loadVerse();
-      }
-    }
-
-    // Navigate to the previous verse
-    async function prevVerse() {
-      if (currentVerse > 1) {
-        currentVerse--;
-      } else if (currentChapter > 1) {
-        currentChapter--;
-        currentVerse = 50; // Assume chapters have max 50 verses (adjust as needed)
-      } else {
-        const currentBookIndex = books.indexOf(currentBook);
-        if (currentBookIndex > 0) {
-          currentBook = books[currentBookIndex - 1];
-          currentChapter = 50; // Assume previous book has 50 chapters (adjust as needed)
-          currentVerse = 50; // Assume the last chapter has 50 verses
-        }
-      }
-      loadVerse();
-    }
-
-    // Initialize
-    loadVerse();
-
-    // Handle desktop scrolling
-    window.addEventListener("wheel", (e) => {
-      if (e.deltaY > 0) {
-        nextVerse(); // Scroll down for next verse
-      } else {
-        prevVerse(); // Scroll up for previous verse
+        suggestions.style.display = "none"; 
       }
     });
 
-    // Handle touch gestures for mobile
-    let startY = 0;
-    document.addEventListener("touchstart", (e) => {
-      startY = e.touches[0].clientY;
+    bookInput.addEventListener("blur", () => {
+      setTimeout(() => {
+        suggestions.style.display = "none";
+      }, 200); 
     });
 
-    document.addEventListener("touchend", (e) => {
-      const endY = e.changedTouches[0].clientY;
-      if (startY > endY + 50) {
-        nextVerse(); // Swipe up for next verse
-      } else if (startY < endY - 50) {
-        prevVerse(); // Swipe down for previous verse
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const book = bookInput.value.trim();
+      const chapter = document.getElementById("chapter-input").value.trim();
+      const verse = document.getElementById("verse-input").value.trim();
+
+      if (book && chapter && verse) {
+        window.location.href = `read.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+      } else {
+        alert("Please enter a valid book, chapter, and verse.");
       }
     });
   </script>
