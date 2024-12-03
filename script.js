@@ -217,15 +217,31 @@ const books = [
       loadVerse();
     }
   
-    loadVerse();
+    // Throttle function to limit the frequency of scroll actions
+    function throttle(callback, delay) {
+      let lastCall = 0;
+      return function (...args) {
+        const now = Date.now();
+        if (now - lastCall >= delay) {
+          lastCall = now;
+          callback(...args);
+        }
+      };
+    }
   
-    window.addEventListener("wheel", (e) => {
-      if (e.deltaY > 0) {
-        nextVerse();
-      } else {
-        prevVerse();
-      }
-    });
+    const SCROLL_DELAY = 750;
+  
+    // Handle desktop scrolling
+    window.addEventListener(
+      "wheel",
+      throttle((e) => {
+        if (e.deltaY > 0) {
+          nextVerse();
+        } else {
+          prevVerse();
+        }
+      }, SCROLL_DELAY)
+    );
   
     let startY = 0;
     document.addEventListener("touchstart", (e) => {
@@ -240,5 +256,7 @@ const books = [
         prevVerse();
       }
     });
+  
+    loadVerse();
   }
   
