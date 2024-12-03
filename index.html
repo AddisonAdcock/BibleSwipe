@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Swipe</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,11 +24,6 @@
     h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
-    }
-
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
     }
 
     form {
@@ -54,7 +48,7 @@
       font-size: 1.2rem;
       padding: 10px;
       width: 150px;
-      max-width: 100%; /* Ensure inputs don't overflow on small screens */
+      max-width: 100%;
       border: 1px solid #ccc;
       border-radius: 5px;
       box-sizing: border-box;
@@ -71,7 +65,7 @@
       border: 1px solid #ccc;
       border-radius: 5px;
       z-index: 1000;
-      display: none; /* Hide suggestions by default */
+      display: none;
     }
 
     .suggestion-item {
@@ -97,14 +91,9 @@
       background-color: #0056b3;
     }
 
-    /* Responsive styles for smaller screens */
     @media (max-width: 480px) {
       h1 {
         font-size: 2rem;
-      }
-
-      p {
-        font-size: 1rem;
       }
 
       input {
@@ -122,7 +111,6 @@
 </head>
 <body>
   <h1>BibleSwipe.com</h1>
-  <p></p>
   <form id="verse-form">
     <div class="input-group">
       <div class="autocomplete">
@@ -149,12 +137,23 @@
     ];
 
     const bookInput = document.getElementById("book-input");
+    const chapterInput = document.getElementById("chapter-input");
+    const verseInput = document.getElementById("verse-input");
     const suggestions = document.getElementById("suggestions");
     const form = document.getElementById("verse-form");
 
+    // Pre-fill the inputs if there is saved progress
+    const lastBook = localStorage.getItem("lastBook") || "";
+    const lastChapter = localStorage.getItem("lastChapter") || "";
+    const lastVerse = localStorage.getItem("lastVerse") || "";
+
+    if (lastBook) bookInput.value = lastBook;
+    if (lastChapter) chapterInput.value = lastChapter;
+    if (lastVerse) verseInput.value = lastVerse;
+
     bookInput.addEventListener("input", () => {
       const input = bookInput.value.toLowerCase();
-      suggestions.innerHTML = ""; 
+      suggestions.innerHTML = "";
       if (input) {
         books
           .filter((book) => book.toLowerCase().startsWith(input))
@@ -171,23 +170,28 @@
           });
         suggestions.style.display = "block";
       } else {
-        suggestions.style.display = "none"; 
+        suggestions.style.display = "none";
       }
     });
 
     bookInput.addEventListener("blur", () => {
       setTimeout(() => {
         suggestions.style.display = "none";
-      }, 200); 
+      }, 200);
     });
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const book = bookInput.value.trim();
-      const chapter = document.getElementById("chapter-input").value.trim();
-      const verse = document.getElementById("verse-input").value.trim();
+      const chapter = chapterInput.value.trim();
+      const verse = verseInput.value.trim();
 
       if (book && chapter && verse) {
+        // Save starting point
+        localStorage.setItem("lastBook", book);
+        localStorage.setItem("lastChapter", chapter);
+        localStorage.setItem("lastVerse", verse);
+
         window.location.href = `read.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
       } else {
         alert("Please enter a valid book, chapter, and verse.");
