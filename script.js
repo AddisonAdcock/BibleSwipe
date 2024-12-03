@@ -27,6 +27,47 @@ const books = [
     };
   }
   
+  // Handle daily streak logic
+  function updateStreak() {
+    const streakKey = "streakCount";
+    const lastVisitKey = "lastVisit";
+
+    const today = new Date().toISOString().split("T")[0];
+    const lastVisit = localStorage.getItem(lastVisitKey);
+    let streakCount = parseInt(localStorage.getItem(streakKey)) || 0;
+
+    if (lastVisit === today) {
+      return streakCount;
+    }
+
+    if (lastVisit) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = yesterday.toISOString().split("T")[0];
+
+      if (lastVisit === yesterdayString) {
+        streakCount += 1;
+      } else {
+        streakCount = 1;
+      }
+    } else {
+      streakCount = 1; 
+    }
+    localStorage.setItem(streakKey, streakCount);
+    localStorage.setItem(lastVisitKey, today);
+    return streakCount;
+  }
+
+  function displayStreak() {
+    const streakTextElement = document.getElementById("streak-text");
+    if (streakTextElement) {
+      const streakCount = updateStreak();
+      streakTextElement.textContent = streakCount;
+    }
+  }
+  
+  
+
   // Adjust font size to fit within the viewport
   function adjustFontSize() {
     const verseTextElement = document.getElementById("verse-text");
@@ -70,6 +111,8 @@ const books = [
     const verseInput = document.getElementById("verse-input");
     const suggestions = document.getElementById("suggestions");
     const form = document.getElementById("verse-form");
+    displayStreak();
+
   
     // Pre-fill inputs with saved progress
     const lastProgress = loadLastProgress();
@@ -127,7 +170,8 @@ const books = [
     const bookParam = urlParams.get("book");
     const chapterParam = urlParams.get("chapter");
     const verseParam = urlParams.get("verse");
-  
+    updateStreak();
+
     const lastProgress = loadLastProgress();
     let currentBook = books.includes(bookParam) ? bookParam : lastProgress.book;
     let currentChapter = parseInt(chapterParam) || lastProgress.chapter;
