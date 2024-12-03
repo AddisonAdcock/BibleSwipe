@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Reader - KJV</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden; /* Prevent scroll bars */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #verse-display {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      padding: 0 20px;
+      box-sizing: border-box; /* Include padding in width/height calculations */
+    }
+
+    #verse-text {
+      font-size: 2rem;
+      line-height: 1.8;
+      text-align: center;
+      word-wrap: break-word;
+      max-width: 90%;
+      overflow-wrap: break-word;
+      transition: font-size 0.2s ease;
+    }
+
+    #verse-reference {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      color: #666;
+      transition: font-size 0.2s ease;
+    }
+
+    /* Ensure proper scaling for smaller devices */
+    @media (max-width: 360px) {
+      #verse-text {
+        font-size: 1.5rem;
+      }
+
+      #verse-reference {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="verse-display">
+    <div id="verse-text">Loading...</div>
+    <div id="verse-reference"></div>
+  </div>
+
+  <script>
+    let bibleData = [];
+    let currentBook = "Genesis";
+    let currentChapter = 1;
+    let currentVerse = 1;
+    let canScroll = true; // Controls scroll throttling
+
+    // Load the CSV using PapaParse
+    function loadBibleData() {
+      Papa.parse('kjv.csv', {
+        download: true,
+        header: true,
+        complete: function(results) {
+          bibleData = results.data;
+          console.log("Bible data loaded:", bibleData);
+          loadVerse();
+        }
+      });
+    }
+
+    // Find the current verse text
+    function findVerse(book, chapter, verse) {
+      const result = bibleData.find(
+        (row) =>
+          row.book === book &&
+          parseInt(row.chapter) === chapter &&
+          parseInt(row.verse) === verse
+      );
+      return result ? result : null;
+    }
+
+    // Dynamically adjust font size for long verses
+    function adjustFontSize() {
+      const verseTextElement = document.getElementById("verse-text");
+      const verseReferenceElement = document.getElementById("verse-reference");
+      const containerHeight = window.innerHeight * 0.8;
+
+      let fontSize = 2; // Start with a base font size in rem
+      verseTextElement.style.fontSize = `${fontSize}rem`;
+      verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
+
+      while (verseTextElement.scrollHeight > containerHeight) {
+        fontSize -= 0.1; // Decrease font size incrementally
+        verseTextElement.style.fontSize = `${fontSize}rem`;
+        verseReferenceElement.style.fontSize = `${fontSize * 0.75}rem`;
+      }
+    }
+
+    // Load the current verse and reference
+    function loadVerse() {
+      const verseData = findVerse(currentBook, currentChapter, currentVerse);
+      const verseTextElement = document.getElementById("verse-text");
+      const verseReferenceElement = document.getElementById("verse-reference");
+
+      if (verseData) {
+        verseTextElement.innerText = verseData.text;
+        verseReferenceElement.innerText = `${verseData.book} ${verseData.chapter}:${verseData.verse}`;
+        adjustFontSize();
+      } else {
+        verseTextElement.innerText = "No more verses.";
+        verseReferenceElement.innerText = "";
+      }
+    }
+
+    // Throttle scrolling
+    function throttleScroll(callback, delay) {
+      if (canScroll) {
+        callback();
+        canScroll = false;
+        setTimeout(() => {
+          canScroll = true;
+        }, delay);
+      }
+    }
+
+    // Handle desktop scrolling
+    window.addEventListener("wheel", (e) => {
+      if (e.deltaY > 0) {
+        throttleScroll(nextVerse, 750); // Set throttle delay to 750ms
+      } else {
+        throttleScroll(prevVerse, 750);
+      }
+    });
+
+    // Handle touch gestures for mobile
+    let startY = 0;
+
+    document.addEventListener("touchstart", (e) => {
+      startY = e.touches[0].clientY;
+    });
+
+    document.addEventListener("touchend", (e) => {
+      const endY = e.changedTouches[0].clientY;
+      if (startY > endY + 50) {
+        throttleScroll(nextVerse, 750); // Set throttle delay to 750ms
+      } else if (startY < endY - 50) {
+        throttleScroll(prevVerse, 750);
+      }
+    });
+
+    // Navigate to the next verse
+    function nextVerse() {
+      currentVerse++;
+      const nextVerseData = findVerse(currentBook, currentChapter, currentVerse);
+      if (!nextVerseData) {
+        currentChapter++;
+        currentVerse = 1;
+      }
+      loadVerse();
+    }
+
+    // Navigate to the previous verse
+    function prevVerse() {
+      if (currentVerse > 1) {
+        currentVerse--;
+      } else if (currentChapter > 1) {
+        currentChapter--;
+        currentVerse = 50; // Assume chapters have max 50 verses (adjust as needed)
+      }
+      loadVerse();
+    }
+
+    // Initialize
+    loadBibleData();
+  </script>
+</body>
+</html>
